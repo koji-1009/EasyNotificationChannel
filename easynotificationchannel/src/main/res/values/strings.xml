@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EasyNotificationChannel</string>
+    <string name="name_1">channel 1</string>
+    <string name="description_1">description 1</string>
+</resources>
