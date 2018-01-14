@@ -16,18 +16,16 @@
 
 package com.app.dr1009.easynotificationchannel
 
-import com.app.dr1009.easynotificationchannel.param.Channel
 import com.app.dr1009.easynotificationchannel.param.ChannelList
-import com.app.dr1009.easynotificationchannel.param.Group
 import com.app.dr1009.easynotificationchannel.param.GroupList
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 
+/**
+ * Internal JSON Adapter
+ */
 internal object Adapter {
-    internal fun channel() = moshi().adapter<Channel>(Channel::class.java)
-    internal fun channelList() = moshi().adapter<ChannelList>(ChannelList::class.java)
-    internal fun group() = moshi().adapter<Group>(Group::class.java)
-    internal fun groupList() = moshi().adapter<GroupList>(GroupList::class.java)
+    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+    internal fun channelList() = moshi.adapter<ChannelList>(ChannelList::class.java)
+    internal fun groupList() = moshi.adapter<GroupList>(GroupList::class.java)
 }
-
-private fun moshi() = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()

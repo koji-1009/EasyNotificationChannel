@@ -36,6 +36,10 @@ class LocaleReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Handle {@link Intent#ACTION_LOCALE_CHANGED} intent.
+     * Re-create group's and channel's by current local resource.
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun localeChange(context: Context) {
         Log.i(TAG, "receive local change intent")
@@ -45,7 +49,7 @@ class LocaleReceiver : BroadcastReceiver() {
                     it.onComplete()
                 }
                 .subscribeOn(Schedulers.newThread())
-                .subscribe({ Log.i(TAG, "finish locale change intent") }, { Log.e(TAG, "local change process is incomplete", it) })
+                .subscribe({ Log.i(TAG, "finish") }, { Log.e(TAG, "incomplete", it) })
     }
 
     companion object {

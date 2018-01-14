@@ -20,8 +20,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.support.annotation.RequiresApi
-import android.text.TextUtils
 import android.util.Log
+import com.app.dr1009.easynotificationchannel.param.Channel
+import com.app.dr1009.easynotificationchannel.param.Group
 
 internal object Util {
 
@@ -42,78 +43,70 @@ internal object Util {
     internal fun register(context: Context) {
         val manager = context.getNotificationManager()
         val prefs = getPreference(context)
-        val editor = prefs.edit()
 
         val registerGroupId = mutableSetOf<String>()
-        context.assets.open(GROUP_DIR).use {
-            var json = ""
-            it.reader().forEachLine { line -> json += line }
-
-            Adapter.groupList().fromJson(json)?.list?.forEach {
-                manager.createNotificationChannelGroup(it.create(context))
-                editor.putString(it.id, Adapter.group().toJson(it))
-
-                registerGroupId.add(it.id)
-            }
+        getGroupList(context).forEach {
+            manager.createNotificationChannelGroup(it.create(context))
+            registerGroupId.add(it.id)
         }
 
         prefs.getStringSet(GROUP_ID_SET, emptySet())
                 .filter { !registerGroupId.contains(it) }
-                .forEach {
-                    manager.deleteNotificationChannelGroup(it)
-                    editor.remove(it)
-                }
-        editor.putStringSet(GROUP_ID_SET, registerGroupId)
+                .forEach { manager.deleteNotificationChannelGroup(it) }
 
         val registerChannelId = mutableSetOf<String>()
-        context.assets.open(CHANNEL_DIR).use {
-            var json = ""
-            it.reader().forEachLine { line -> json += line }
-
-            Adapter.channelList().fromJson(json)?.list?.forEach {
-                manager.createNotificationChannel(it.create(context))
-                editor.putString(it.id, Adapter.channel().toJson(it))
-
-                registerChannelId.add(it.id)
-            }
+        getChannelList(context).forEach {
+            manager.createNotificationChannel(it.create(context))
+            registerChannelId.add(it.id)
         }
 
         prefs.getStringSet(CHANNEL_ID_SET, emptySet())
                 .filter { !registerChannelId.contains(it) }
-                .forEach {
-                    manager.deleteNotificationChannel(it)
-                    editor.remove(it)
+                .forEach { manager.deleteNotificationChannel(it) }
+
+        prefs.edit()
+                .apply {
+                    // Set registered group and channel ids
+                    putStringSet(GROUP_ID_SET, registerGroupId)
+                    putStringSet(CHANNEL_ID_SET, registerChannelId)
+
+                    // Set registered app version-code
+                    putInt(APP_VER, BuildConfig.VERSION_CODE)
                 }
-        editor.putStringSet(CHANNEL_ID_SET, registerChannelId)
-
-        // Set registered app version-code
-        editor.putInt(APP_VER, BuildConfig.VERSION_CODE)
-
-        editor.apply()
+                .apply()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     internal fun updateLocal(context: Context) {
         val manager = context.getNotificationManager()
-        val prefs = getPreference(context)
 
-        prefs.getStringSet(GROUP_ID_SET, emptySet())
-                .forEach {
-                    Log.i(TAG, "update channel group id = $it")
-                    val json = prefs.getString(it, null)
-                    if (!TextUtils.isEmpty(json)) {
-                        manager.createNotificationChannelGroup(Adapter.group().fromJson(json)?.create(context))
-                    }
-                }
+        getGroupList(context).forEach {
+            Log.i(TAG, "update channel group id = ${it.id}")
+            manager.createNotificationChannelGroup(it.create(context))
+        }
 
-        prefs.getStringSet(CHANNEL_ID_SET, emptySet())
-                .forEach {
-                    Log.i(TAG, "update channel id = $it")
-                    val json = prefs.getString(it, null)
-                    if (!TextUtils.isEmpty(json)) {
-                        manager.createNotificationChannel(Adapter.channel().fromJson(json)?.create(context))
-                    }
-                }
+        getChannelList(context).forEach {
+            Log.i(TAG, "update channel id = ${it.id}")
+            manager.createNotificationChannel(it.create(context))
+        }
+    }
+
+    private fun getGroupList(context: Context): List<Group> {
+        context.assets.open(GROUP_DIR).use {
+            val json = StringBuilder()
+            it.reader().forEachLine { line -> json.append(line) }
+
+            return Adapter.groupList().fromJson(json.toString())?.list ?: emptyList()
+        }
+    }
+
+    private fun getChannelList(context: Context): List<Channel> {
+        context.assets.open(CHANNEL_DIR).use {
+            val json = StringBuilder()
+            it.reader().forEachLine { line -> json.append(line) }
+
+            return Adapter.channelList().fromJson(json.toString())?.list ?: emptyList()
+        }
     }
 
     private fun getPreference(context: Context): SharedPreferences {

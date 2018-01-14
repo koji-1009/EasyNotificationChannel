@@ -17,14 +17,28 @@ package com.app.dr1009.easynotificationchannel
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 
 object EasyNotificationChannel {
 
-    fun install(context: Context) {
+    fun init(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (Util.checkUpdate(context)) {
-                Util.register(context)
-            }
+            Log.i(TAG, "init EasyNotificationChannel")
+            Completable
+                    .create {
+                        if (Util.checkUpdate(context)) {
+                            Log.i(TAG, "app is upgraded")
+                            Util.register(context)
+                        }
+
+                        it.onComplete()
+                    }
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe({ Log.i(TAG, "finish") }, { Log.e(TAG, "incomplete", it) })
         }
     }
+
+    const private val TAG = "EasyNotificationChannel"
 }
