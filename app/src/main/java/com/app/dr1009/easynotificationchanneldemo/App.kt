@@ -1,13 +1,13 @@
 package com.app.dr1009.easynotificationchanneldemo
 
 import android.app.Application
-import android.util.Log
+import com.app.dr1009.easynotificationchannel.EasyNotificationChannel
 
 class App : Application() {
-    private val TAG = "App"
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, ": ")
+
+        EasyNotificationChannel.install(applicationContext)
     }
 }

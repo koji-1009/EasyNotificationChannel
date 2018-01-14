@@ -1,6 +1,21 @@
+/*
+ * Copyright (c) 2018 Koji Wakamiya.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.app.dr1009.easynotificationchannel
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,7 +30,7 @@ class LocaleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             when (intent?.action) {
-                // Change title and description
+            // Change title and description
                 Intent.ACTION_LOCALE_CHANGED -> localeChange(context)
             }
         }
@@ -26,18 +41,11 @@ class LocaleReceiver : BroadcastReceiver() {
         Log.i(TAG, "receive local change intent")
         Completable
                 .create {
-                    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    ChannelUtil.easyChannels(context).forEach { channel ->
-                        Log.i(TAG, "update channel id = ${channel.channelId}")
-                        manager.createNotificationChannel(channel.createNotificationChannel(context))
-                    }
-
+                    Util.updateLocal(context)
                     it.onComplete()
                 }
                 .subscribeOn(Schedulers.newThread())
-                .subscribe {
-                    Log.i(TAG, "finish locale change receiver")
-                }
+                .subscribe({ Log.i(TAG, "finish locale change intent") }, { Log.e(TAG, "local change process is incomplete", it) })
     }
 
     companion object {

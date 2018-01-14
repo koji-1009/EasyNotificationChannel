@@ -1,0 +1,18 @@
+{
+  "list": [
+    {
+      "id": "channel 1",
+      "nameRes": "name_1",
+      "descriptionRes": "description_1",
+      "importance": 3,
+      "groupId": "group 1"
+    },
+    {
+      "id": "channel 2",
+      "nameRes": "name_2",
+      "descriptionRes": "description_2",
+      "groupId": "group 2"
+    }
+  ]
+}
+
