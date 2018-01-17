@@ -1,3 +1,5 @@
+apply plugin: 'maven'
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
