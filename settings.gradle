@@ -1,1 +1,1 @@
-include ':app', ':easynotificationchannel'
+include ':demo', ':easynotificationchannel'

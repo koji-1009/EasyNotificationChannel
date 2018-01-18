@@ -71,6 +71,18 @@ example
 }
 ```
 
+### Change local
+
+Add following snippet to your AndroidManifest.
+
+```xml:AndroidManifest.xml
+<receiver android:name="com.app.dr1009.easynotificationchannel.LocaleReceiver">
+    <intent-filter>
+        <action android:name="android.intent.action.LOCALE_CHANGED" />
+    </intent-filter>
+</receiver>
+```
+
 ## Download
 
 Step 1. Add the JitPack repository to your build file
