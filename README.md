@@ -9,6 +9,22 @@ Register Notification Channel and Notification Channel Group, and change name wh
 
 ## How to use
 
+## Init EasyNotificationChannel
+
+App init method to your Application class.
+
+```kotlin:Application
+class App : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        EasyNotificationChannel.init(applicationContext)
+    }
+}
+
+```
+
 ### Group
 
 - id
