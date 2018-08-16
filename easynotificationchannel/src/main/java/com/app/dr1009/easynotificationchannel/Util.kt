@@ -26,16 +26,16 @@ import com.app.dr1009.easynotificationchannel.param.Group
 
 internal object Util {
 
-    const private val TAG = "Util"
+    private const val TAG = "Util"
     // JSON
-    const private val CHANNEL_DIR = "easynotification/channel.json"
-    const private val GROUP_DIR = "easynotification/group.json"
+    private const val CHANNEL_DIR = "easynotification/channel.json"
+    private const val GROUP_DIR = "easynotification/group.json"
 
     // Shared Preference
-    const private val NAME = "com.app.dr1009.easynotificationchannel"
-    const private val CHANNEL_ID_SET = "channel_id_set"
-    const private val GROUP_ID_SET = "group_id_set"
-    const private val APP_VER = "app_ver"
+    private const val NAME = "com.app.dr1009.easynotificationchannel"
+    private const val CHANNEL_ID_SET = "channel_id_set"
+    private const val GROUP_ID_SET = "group_id_set"
+    private const val APP_VER = "app_ver"
 
     internal fun checkUpdate(context: Context) = getPreference(context).getInt(APP_VER, 0) < BuildConfig.VERSION_CODE
 

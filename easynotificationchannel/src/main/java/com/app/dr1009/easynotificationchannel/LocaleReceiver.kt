@@ -53,6 +53,6 @@ class LocaleReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const private val TAG = "LocaleReceiver"
+        private const val TAG = "LocaleReceiver"
     }
 }

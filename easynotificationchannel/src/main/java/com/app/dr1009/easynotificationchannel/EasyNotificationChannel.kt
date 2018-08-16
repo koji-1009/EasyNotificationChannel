@@ -40,5 +40,5 @@ object EasyNotificationChannel {
         }
     }
 
-    const private val TAG = "EasyNotificationChannel"
+    private const val TAG = "EasyNotificationChannel"
 }
