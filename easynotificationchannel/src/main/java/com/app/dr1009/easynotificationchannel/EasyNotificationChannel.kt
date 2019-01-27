@@ -18,25 +18,25 @@ package com.app.dr1009.easynotificationchannel
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 object EasyNotificationChannel {
 
     fun init(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.i(TAG, "init EasyNotificationChannel")
-            Completable
-                    .create {
-                        if (Util.checkUpdate(context)) {
-                            Log.i(TAG, "app is upgraded")
-                            Util.register(context)
-                        }
-
-                        it.onComplete()
+            GlobalScope.launch {
+                try {
+                    if (Util.checkUpdate(context)) {
+                        Log.i(TAG, "app is upgraded")
+                        Util.register(context)
+                        Log.i(TAG, "finish")
                     }
-                    .subscribeOn(Schedulers.newThread())
-                    .subscribe({ Log.i(TAG, "finish") }, { Log.e(TAG, "incomplete", it) })
+                } catch (t: Throwable) {
+                    Log.e(TAG, "incomplete", t)
+                }
+            }
         }
     }
 

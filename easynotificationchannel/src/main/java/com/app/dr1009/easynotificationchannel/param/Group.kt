@@ -23,6 +23,7 @@ import android.support.annotation.RequiresApi
 import com.app.dr1009.easynotificationchannel.getResString
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-internal class Group(val id: String, private val nameRes: String) {
-    fun create(context: Context): NotificationChannelGroup = NotificationChannelGroup(id, context.getResString(nameRes))
+internal data class Group(val id: String, val nameRes: String) {
+    fun create(context: Context): NotificationChannelGroup =
+        NotificationChannelGroup(id, context.getResString(nameRes))
 }

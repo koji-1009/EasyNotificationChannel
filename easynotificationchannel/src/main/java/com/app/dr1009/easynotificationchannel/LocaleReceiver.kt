@@ -22,15 +22,15 @@ import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.Log
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class LocaleReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             when (intent?.action) {
-            // Change title and description
+                // Change title and description
                 Intent.ACTION_LOCALE_CHANGED -> localeChange(context)
             }
         }
@@ -43,13 +43,14 @@ class LocaleReceiver : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun localeChange(context: Context) {
         Log.i(TAG, "receive local change intent")
-        Completable
-                .create {
-                    Util.updateLocal(context)
-                    it.onComplete()
-                }
-                .subscribeOn(Schedulers.newThread())
-                .subscribe({ Log.i(TAG, "finish") }, { Log.e(TAG, "incomplete", it) })
+        GlobalScope.launch {
+            try {
+                Util.updateLocal(context)
+                Log.i(TAG, "finish")
+            } catch (t: Throwable) {
+                Log.e(TAG, "incomplete", t)
+            }
+        }
     }
 
     companion object {

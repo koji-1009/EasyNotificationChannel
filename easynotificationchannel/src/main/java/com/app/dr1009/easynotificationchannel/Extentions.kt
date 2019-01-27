@@ -19,5 +19,5 @@ package com.app.dr1009.easynotificationchannel
 import android.app.NotificationManager
 import android.content.Context
 
-fun Context.getNotificationManager(): NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-fun Context.getResString(resName: String): String = getString(resources.getIdentifier(resName, "string", packageName))
+internal fun Context.getNotificationManager(): NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+internal fun Context.getResString(resName: String): String = getString(resources.getIdentifier(resName, "string", packageName))

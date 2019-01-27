@@ -24,19 +24,26 @@ import android.support.annotation.RequiresApi
 import com.app.dr1009.easynotificationchannel.getResString
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-internal class Channel(val id: String,
-                       private val nameRes: String,
-                       private val descriptionRes: String? = null,
-                       private val importance: Int = 3,
-                       private val groupId: String? = null) {
+internal data class Channel(
+    val id: String,
+    private val nameRes: String,
+    private val descriptionRes: String? = null,
+    private val importance: Int = 3,
+    private val groupId: String? = null
+) {
 
-    fun create(context: Context): NotificationChannel = NotificationChannel(id, context.getResString(nameRes), notificationImportance())
+    fun create(context: Context): NotificationChannel =
+        NotificationChannel(id, context.getResString(nameRes), notificationImportance())
             .apply {
-                if (descriptionRes != null) {
+                if (!descriptionRes.isNullOrEmpty()) {
                     description = context.getResString(descriptionRes)
                 }
 
-                group = groupId
+                if (groupId.isNullOrEmpty()) {
+                    group = null
+                } else {
+                    group = groupId
+                }
             }
 
     private fun notificationImportance() = when (importance) {

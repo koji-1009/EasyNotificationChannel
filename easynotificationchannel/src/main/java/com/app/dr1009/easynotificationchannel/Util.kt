@@ -19,10 +19,12 @@ package com.app.dr1009.easynotificationchannel
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
 import android.util.Log
 import com.app.dr1009.easynotificationchannel.param.Channel
 import com.app.dr1009.easynotificationchannel.param.Group
+import org.json.JSONObject
 
 internal object Util {
 
@@ -32,12 +34,18 @@ internal object Util {
     private const val GROUP_DIR = "easynotification/group.json"
 
     // Shared Preference
-    private const val NAME = "com.app.dr1009.easynotificationchannel"
     private const val CHANNEL_ID_SET = "channel_id_set"
     private const val GROUP_ID_SET = "group_id_set"
     private const val APP_VER = "app_ver"
 
-    internal fun checkUpdate(context: Context) = getPreference(context).getInt(APP_VER, 0) < BuildConfig.VERSION_CODE
+    internal fun checkUpdate(context: Context): Boolean {
+        val lastCode = getPreference(context).getLong(APP_VER, 0)
+        val currentCode =
+            context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+
+        return lastCode < currentCode
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     internal fun register(context: Context) {
@@ -51,8 +59,8 @@ internal object Util {
         }
 
         prefs.getStringSet(GROUP_ID_SET, emptySet())
-                .filter { !registerGroupId.contains(it) }
-                .forEach { manager.deleteNotificationChannelGroup(it) }
+            ?.filter { !registerGroupId.contains(it) }
+            ?.forEach { manager.deleteNotificationChannelGroup(it) }
 
         val registerChannelId = mutableSetOf<String>()
         getChannelList(context).forEach {
@@ -61,19 +69,22 @@ internal object Util {
         }
 
         prefs.getStringSet(CHANNEL_ID_SET, emptySet())
-                .filter { !registerChannelId.contains(it) }
-                .forEach { manager.deleteNotificationChannel(it) }
+            ?.filter { !registerChannelId.contains(it) }
+            ?.forEach { manager.deleteNotificationChannel(it) }
 
         prefs.edit()
-                .apply {
-                    // Set registered group and channel ids
-                    putStringSet(GROUP_ID_SET, registerGroupId)
-                    putStringSet(CHANNEL_ID_SET, registerChannelId)
+            .apply {
+                // Set registered group and channel ids
+                putStringSet(GROUP_ID_SET, registerGroupId)
+                putStringSet(CHANNEL_ID_SET, registerChannelId)
 
-                    // Set registered app version-code
-                    putInt(APP_VER, BuildConfig.VERSION_CODE)
-                }
-                .apply()
+                // Set registered app version-code
+                putLong(
+                    APP_VER,
+                    context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+                )
+            }
+            .apply()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -91,26 +102,57 @@ internal object Util {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private fun getGroupList(context: Context): List<Group> {
         context.assets.open(GROUP_DIR).use {
             val json = StringBuilder()
             it.reader().forEachLine { line -> json.append(line) }
 
-            return Adapter.groupList().fromJson(json.toString())?.list ?: emptyList()
+            val list = JSONObject(json.toString()).getJSONArray("list")
+            val listSize = list.length()
+            val jsonList = mutableListOf<Group>()
+            repeat(listSize) { num ->
+                val item = list[num] as JSONObject
+                val group = Group(
+                    id = item.getString("id"),
+                    nameRes = item.getString("nameRes")
+                )
+
+                jsonList.add(group)
+            }
+
+            return jsonList
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private fun getChannelList(context: Context): List<Channel> {
         context.assets.open(CHANNEL_DIR).use {
             val json = StringBuilder()
             it.reader().forEachLine { line -> json.append(line) }
 
-            return Adapter.channelList().fromJson(json.toString())?.list ?: emptyList()
+            val list = JSONObject(json.toString()).getJSONArray("list")
+            val listSize = list.length()
+            val jsonList = mutableListOf<Channel>()
+            repeat(listSize) { num ->
+                val item = list[num] as JSONObject
+                val channel = Channel(
+                    id = item.getString("id"),
+                    nameRes = item.getString("nameRes"),
+                    descriptionRes = item.optString("descriptionRes"),
+                    importance = item.optInt("importance", 3),
+                    groupId = item.optString("groupId")
+                )
+
+                jsonList.add(channel)
+            }
+
+            return jsonList
         }
     }
 
     private fun getPreference(context: Context): SharedPreferences {
-        return context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+        return PreferenceManager.getDefaultSharedPreferences(context)
     }
 
 }
